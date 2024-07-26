@@ -1,0 +1,32 @@
+body{
+    background-color: rgb(179, 152, 152);
+    background-image: url('');
+}
+.nav a{
+    color: white;
+    text-decoration: none;
+    margin-top: 20px;
+    
+}
+.nav a:hover {
+ color: blue;
+}
+.btn{
+    color: white;
+    background-color: blue;
+    padding: 10px;
+    width: 130px;
+    border-radius: 10px;
+    border: none;
+    text-align: center;
+    text-decoration: none;
+}
+.btn:hover{
+    background-color: rgb(161, 161, 240);
+}
+h1 p{
+    color: aliceblue;
+}
+.row{
+    display: flex;
+}
