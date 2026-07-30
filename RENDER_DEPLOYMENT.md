@@ -1,6 +1,6 @@
 # 🚀 Render Deployment Guide for Hancia Manga Reader
 
-This repository is pre-configured for seamless, zero-config deployment on **[Render.com](https://render.com)**.
+This repository is pre-configured for seamless deployment on **[Render.com](https://render.com)** with an explicit build step.
 
 ---
 
@@ -10,9 +10,9 @@ This repository is pre-configured for seamless, zero-config deployment on **[Ren
 1. Push your changes or ensure your repository is updated on GitHub (`testings` or `main` branch).
 2. Log into your **[Render Dashboard](https://dashboard.render.com/)**.
 3. Click **New +** in the top right corner and select **Blueprint**.
-4. Connect your GitHub account and select the **`12345noubia/hancia`** repository.
+4. Connect your GitHub account and select the **`12345noubia/hancia`** repository (branch `testings`).
 5. Render will automatically detect the `render.yaml` file in the root directory.
-6. Click **Apply**. Render will automatically build and publish your web app with HTTPS enabled.
+6. Click **Apply**. Render will run the build command (`npm run build`) and deploy the static site from `./dist` with HTTPS enabled.
 
 ---
 
@@ -24,15 +24,16 @@ If you prefer manual setup without blueprints:
 4. Fill in the deployment details:
    - **Name:** `hancia-manga-reader`
    - **Branch:** `testings` (or `main`)
-   - **Build Command:** *(Leave blank)*
-   - **Publish Directory:** `.` (root directory)
+   - **Build Command:** `npm run build`
+   - **Publish Directory:** `./dist`
 5. Click **Create Static Site**.
 
 ---
 
-## ⚙️ How it Works & CORS Capabilities
-- **Static Hosting:** Hancia is a lightweight, ultra-fast client-side single page application built with HTML5, CSS3, and modern JavaScript ES6+.
+## ⚙️ Build Process & Configuration
+- **Package Config (`package.json`):** Defines `npm run build`, which creates a clean production `./dist` directory containing `index.html`, `css`, `js`, and `img` assets.
+- **Render Config (`render.yaml`):** Sets `buildCommand: npm run build` and `staticPublishPath: ./dist`.
 - **Real-Time MangaDex API:** The app communicates live with `https://api.mangadex.org`.
-- **CORS Resiliency:** Includes automatic CORS proxy failover (`corsproxy.io`, `allorigins`) to ensure uninterrupted real-time fetching across all devices and hosting platforms.
-- **Vertical Webtoon Reader:** Built with vertical continuous scrolling optimized for webtoons and manga chapters.
-- **Dark Mode:** Supports automatic system dark/light preference detection and manual toggle saved in `localStorage`.
+- **CORS Resiliency:** Includes automatic CORS proxy failover (`corsproxy.io`, `allorigins`) to ensure uninterrupted real-time fetching.
+- **Vertical Webtoon Reader:** Continuous scrolling reader optimized for both standard manga and vertical webtoons.
+- **Dark Mode:** System theme auto-detection and manual toggle saved in `localStorage`.
