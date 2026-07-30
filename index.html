@@ -1,196 +1,206 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hancia Manga - Real-Time Manga & Webtoon Explorer</title>
+    <title>Hancia - Real-Time Manga & Webtoon Reader</title>
     <link rel="stylesheet" href="./css/styles.css">
-    <!-- FontAwesome for icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 </head>
-<body class="dark-theme">
+<body>
 
     <!-- Header Navigation -->
     <header class="navbar">
         <div class="nav-container">
-            <a href="#" class="logo">
+            <a href="#" class="logo" id="logoBtn">
                 <i class="fa-solid fa-book-open-reader"></i>
                 <span>Hancia<strong>Manga</strong></span>
             </a>
-
-            <!-- Search Bar in Header -->
-            <div class="search-box">
+            
+            <div class="search-box-header">
                 <i class="fa-solid fa-magnifying-glass search-icon"></i>
-                <input type="text" id="searchInput" placeholder="Search manga, webtoons, manhwa..." autocomplete="off">
-                <button type="button" id="clearSearchBtn" class="clear-btn hidden" title="Clear search">
-                    <i class="fa-solid fa-xmark"></i>
-                </button>
-                <button id="searchBtn" class="btn-search">Search</button>
+                <input type="text" id="headerSearchInput" placeholder="Search manga, manhwa, webtoons...">
+                <button id="headerSearchBtn" type="button">Search</button>
             </div>
 
-            <!-- Controls (Language & Theme Toggle) -->
-            <div class="nav-controls">
-                <div class="lang-selector">
-                    <i class="fa-solid fa-globe"></i>
-                    <select id="langSelect" title="Select Manga Language">
-                        <option value="">All Languages</option>
-                        <option value="en">English</option>
-                        <option value="ja">Japanese (Raw)</option>
-                        <option value="ko">Korean</option>
-                        <option value="zh">Chinese</option>
-                        <option value="es">Spanish</option>
-                        <option value="fr">French</option>
-                        <option value="de">German</option>
-                        <option value="pt-br">Portuguese (BR)</option>
-                        <option value="it">Italian</option>
-                        <option value="ru">Russian</option>
-                    </select>
-                </div>
-
-                <button id="themeToggleBtn" class="theme-toggle-btn" title="Toggle Light/Dark Mode">
-                    <i class="fa-solid fa-moon icon-dark"></i>
-                    <i class="fa-solid fa-sun icon-light"></i>
+            <div class="nav-actions">
+                <button id="themeToggleBtn" class="theme-toggle" aria-label="Toggle Dark/Light Mode">
+                    <i class="fa-solid fa-moon"></i>
                 </button>
             </div>
         </div>
     </header>
 
-    <!-- Main Content Area -->
-    <main class="main-container">
+    <!-- Main Content Container -->
+    <main class="main-content" id="mainContent">
         
-        <!-- Hero / Section Header -->
-        <section class="section-header">
-            <div class="section-title-wrap">
-                <h2 id="sectionTitle">Popular Manga & Webtoons</h2>
-                <p id="sectionSubtitle">Discover real-time updates from MangaDex API with full chapter access</p>
-            </div>
-            <div class="quick-tags">
-                <button class="tag-btn active" data-tag="">All</button>
-                <button class="tag-btn" data-tag="action">Action</button>
-                <button class="tag-btn" data-tag="romance">Romance</button>
-                <button class="tag-btn" data-tag="fantasy">Fantasy</button>
-                <button class="tag-btn" data-tag="comedy">Comedy</button>
-                <button class="tag-btn" data-tag="slice of life">Slice of Life</button>
-            </div>
-        </section>
-
-        <!-- Loader Spinner -->
-        <div id="loadingSpinner" class="spinner-container hidden">
-            <div class="spinner"></div>
-            <p>Fetching real-time data from MangaDex...</p>
-        </div>
-
-        <!-- Error Container -->
-        <div id="errorMessage" class="error-container hidden">
-            <i class="fa-solid fa-circle-exclamation error-icon"></i>
-            <h3 id="errorTitle">Oops! Something went wrong</h3>
-            <p id="errorText">Unable to load content. Please check your internet connection or try again.</p>
-            <button id="retryBtn" class="btn-retry">Retry</button>
-        </div>
-
-        <!-- Manga Grid Results -->
-        <section id="mangaGrid" class="manga-grid">
-            <!-- Dynamic Manga Cards will be rendered here -->
-        </section>
-
-        <!-- Empty Results Message -->
-        <div id="noResults" class="no-results-container hidden">
-            <i class="fa-solid fa-ghost"></i>
-            <h3>No Manga Found</h3>
-            <p>Try searching for a different title or clearing your filter filters.</p>
-        </div>
-
-        <!-- Pagination Controls -->
-        <div id="pagination" class="pagination-container hidden">
-            <button id="prevPageBtn" class="pagination-btn"><i class="fa-solid fa-chevron-left"></i> Previous</button>
-            <span id="pageIndicator" class="page-indicator">Page 1</span>
-            <button id="nextPageBtn" class="pagination-btn">Next <i class="fa-solid fa-chevron-right"></i></button>
-        </div>
-    </main>
-
-    <!-- Manga Details Modal -->
-    <div id="mangaModal" class="modal-overlay hidden">
-        <div class="modal-container">
-            <button id="closeModalBtn" class="close-modal-btn"><i class="fa-solid fa-xmark"></i></button>
-            <div class="modal-content">
-                <div class="modal-left">
-                    <img id="modalCover" src="" alt="Manga Cover" class="modal-cover-img">
-                    <div class="modal-meta-info">
-                        <span id="modalStatus" class="status-badge">Ongoing</span>
-                        <span id="modalYear" class="year-badge">2023</span>
-                        <span id="modalLang" class="lang-badge">EN</span>
-                    </div>
-                </div>
-                <div class="modal-right">
-                    <h2 id="modalTitle">Manga Title</h2>
-                    <p id="modalAltTitles" class="alt-titles"></p>
-                    <div id="modalTags" class="tags-container"></div>
-                    <div class="description-box">
-                        <h3>Synopsis</h3>
-                        <p id="modalDescription">Loading description...</p>
+        <!-- Hero Search Section -->
+        <section class="hero-section">
+            <div class="hero-body">
+                <h1>Discover Real-Time Manga, Manhwa & Webtoons</h1>
+                <p>Search thousands of titles and read chapters in any language with live MangaDex integration.</p>
+                
+                <div class="hero-search-card">
+                    <div class="search-input-group">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                        <input type="text" id="heroSearchInput" placeholder="Search manga, webtoon or manhwa title (e.g. Solo Leveling, One Piece)...">
+                        <button id="heroSearchBtn" class="btn btn-primary"><i class="fa-solid fa-magnifying-glass"></i> Search</button>
                     </div>
 
-                    <!-- Chapters Section -->
-                    <div class="chapters-section">
-                        <div class="chapters-header">
-                            <h3>Available Chapters</h3>
-                            <div class="chapter-filter">
-                                <select id="chapterLangSelect">
-                                    <option value="">All Languages</option>
-                                    <option value="en" selected>English</option>
-                                    <option value="ja">Japanese</option>
-                                    <option value="es">Spanish</option>
-                                    <option value="fr">French</option>
-                                </select>
-                            </div>
+                    <div class="filters-row">
+                        <div class="filter-group">
+                            <label><i class="fa-solid fa-globe"></i> Language Filter:</label>
+                            <select id="langFilter">
+                                <option value="all">All Languages</option>
+                                <option value="en">English</option>
+                                <option value="ja">Japanese</option>
+                                <option value="ko">Korean</option>
+                                <option value="zh">Chinese</option>
+                                <option value="es">Spanish</option>
+                                <option value="fr">French</option>
+                                <option value="pt-br">Portuguese (BR)</option>
+                                <option value="id">Indonesian</option>
+                                <option value="ru">Russian</option>
+                            </select>
                         </div>
 
-                        <div id="chaptersLoading" class="mini-spinner hidden"></div>
-                        <ul id="chaptersList" class="chapters-list">
-                            <!-- Dynamic Chapter Items -->
-                        </ul>
+                        <div class="filter-group">
+                            <label><i class="fa-solid fa-filter"></i> Origin Type:</label>
+                            <select id="typeFilter">
+                                <option value="all">All Types</option>
+                                <option value="ja">Manga (Japanese)</option>
+                                <option value="ko">Manhwa (Korean)</option>
+                                <option value="zh">Manhua (Chinese)</option>
+                            </select>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
-    </div>
+        </section>
 
-    <!-- Chapter Reader View Modal -->
-    <div id="readerModal" class="reader-overlay hidden">
-        <div class="reader-header">
-            <div class="reader-info">
-                <button id="backToMangaBtn" class="btn-back"><i class="fa-solid fa-arrow-left"></i> Back</button>
-                <div class="reader-title-wrap">
-                    <h4 id="readerMangaTitle">Manga Title</h4>
-                    <span id="readerChapterTitle">Chapter 1</span>
+        <!-- Catalog Section -->
+        <section class="catalog-section">
+            <div class="section-header">
+                <h2 id="sectionTitle"><i class="fa-solid fa-fire"></i> Popular Manga & Webtoons</h2>
+                <span id="resultsCount" class="results-count"></span>
+            </div>
+
+            <!-- Loading Spinner -->
+            <div id="loadingSpinner" class="spinner-container hidden">
+                <div class="spinner"></div>
+                <p>Fetching real-time content from MangaDex...</p>
+            </div>
+
+            <!-- Error Message -->
+            <div id="errorMessage" class="error-box hidden">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+                <p id="errorText">Failed to load content from MangaDex API.</p>
+                <button id="retryBtn" class="btn btn-secondary"><i class="fa-solid fa-rotate-right"></i> Retry</button>
+            </div>
+
+            <!-- Manga Cards Grid -->
+            <div id="mangaGrid" class="manga-grid">
+                <!-- Manga cards injected dynamically -->
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Details View / Modal -->
+    <div id="mangaDetailsView" class="details-view hidden">
+        <button id="closeDetailsBtn" class="back-btn"><i class="fa-solid fa-arrow-left"></i> Back to Catalog</button>
+        
+        <div class="manga-details-container" id="mangaDetailsContainer">
+            <!-- Dynamic Manga Info -->
+        </div>
+
+        <div class="chapters-container">
+            <div class="chapters-header">
+                <h3><i class="fa-solid fa-list-ol"></i> Available Chapters</h3>
+                <div class="chapter-controls">
+                    <input type="text" id="chapterSearchInput" placeholder="Search chapter number or title...">
+                    <select id="chapterLangSelect">
+                        <option value="all">All Languages</option>
+                    </select>
+                    <button id="sortOrderBtn" class="btn btn-outline" title="Toggle Sort Order">
+                        <i class="fa-solid fa-arrow-down-short-wide"></i> <span id="sortOrderText">Ascending</span>
+                    </button>
                 </div>
             </div>
-            <div class="reader-controls">
-                <button id="prevChapterBtn" class="reader-nav-btn"><i class="fa-solid fa-step-backward"></i> Prev Chapter</button>
-                <span id="pageCounter" class="page-counter">Page 1 / 1</span>
-                <button id="nextChapterBtn" class="reader-nav-btn">Next Chapter <i class="fa-solid fa-step-forward"></i></button>
-                <button id="closeReaderBtn" class="close-reader-btn"><i class="fa-solid fa-xmark"></i></button>
-            </div>
-        </div>
 
-        <div id="readerContent" class="reader-content">
-            <div id="readerLoading" class="spinner-container">
+            <div id="chaptersLoading" class="spinner-container hidden">
                 <div class="spinner"></div>
-                <p>Loading chapter pages from MangaDex At-Home Server...</p>
+                <p>Fetching chapters...</p>
             </div>
-            <div id="pagesContainer" class="pages-container hidden">
-                <!-- Page images rendered here -->
+
+            <div id="chaptersList" class="chapters-list">
+                <!-- Dynamic Chapter list items -->
             </div>
         </div>
     </div>
 
-    <!-- Footer -->
+    <!-- Vertical Reader View -->
+    <div id="readerView" class="reader-view hidden">
+        <!-- Sticky Reader Control Bar -->
+        <div class="reader-toolbar">
+            <button id="exitReaderBtn" class="btn btn-icon" title="Close Reader">
+                <i class="fa-solid fa-arrow-left"></i> <span>Back</span>
+            </button>
+
+            <div class="reader-title-info">
+                <span id="readerMangaTitle" class="manga-title">Manga Title</span>
+                <span id="readerChapterTitle" class="chapter-title">Chapter Title</span>
+            </div>
+
+            <div class="reader-nav-controls">
+                <button id="prevChapterBtn" class="btn btn-secondary btn-sm" title="Previous Chapter">
+                    <i class="fa-solid fa-chevron-left"></i> Prev
+                </button>
+                <select id="readerChapterSelect" class="chapter-select">
+                    <!-- Chapter options -->
+                </select>
+                <button id="nextChapterBtn" class="btn btn-secondary btn-sm" title="Next Chapter">
+                    Next <i class="fa-solid fa-chevron-right"></i>
+                </button>
+            </div>
+
+            <div class="reader-settings">
+                <select id="dataQualitySelect" class="quality-select" title="Image Server Quality">
+                    <option value="data">High Quality</option>
+                    <option value="dataSaver">Data Saver (Faster)</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Vertical Slide Reader Container -->
+        <div id="readerContainer" class="reader-container">
+            <div id="readerLoading" class="spinner-container">
+                <div class="spinner"></div>
+                <p>Loading chapter pages vertically...</p>
+            </div>
+            
+            <!-- Dynamic vertical image sequence -->
+            <div id="readerPages" class="reader-pages"></div>
+
+            <!-- End of Chapter Navigation -->
+            <div id="readerFooter" class="reader-footer hidden">
+                <h3>End of Chapter</h3>
+                <p>You have reached the end of this chapter.</p>
+                <div class="footer-buttons">
+                    <button id="footerPrevBtn" class="btn btn-secondary"><i class="fa-solid fa-arrow-left"></i> Previous Chapter</button>
+                    <button id="footerBackDetailsBtn" class="btn btn-outline"><i class="fa-solid fa-list"></i> Chapter List</button>
+                    <button id="footerNextBtn" class="btn btn-primary">Next Chapter <i class="fa-solid fa-arrow-right"></i></button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Global Footer -->
     <footer class="footer">
-        <p>Powered by <a href="https://mangadex.org" target="_blank" rel="noopener">MangaDex API</a> | Built with HTML5, CSS3 & JavaScript</p>
+        <p>&copy; 2025 Hancia Manga Reader. Powered by <a href="https://mangadex.org" target="_blank" rel="noopener">MangaDex API</a>. Supports CORS fallback & vertical scrolling.</p>
     </footer>
 
     <script src="js/script.js"></script>
