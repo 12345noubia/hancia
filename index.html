@@ -3,43 +3,196 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>One PLace</title>
+    <title>Hancia Manga - Real-Time Manga & Webtoon Explorer</title>
     <link rel="stylesheet" href="./css/styles.css">
+    <!-- FontAwesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 </head>
-<body>
-    
-    <div style="display: flex; position: relative; justify-content: space-evenly;" class="nav">
-        <img src="" alt="logo">
-          <a href="index.html">home</a>
-          <a href="popup.html">service</a>
-          <a href="">about</a>
-          <a href="" class="btn">sign up</a>
-    </div>
+<body class="dark-theme">
 
-    <div class="main">
-        <div class="row">
-            <div class="col-1">
-                <img src="c:\Users\Noubia Bilomia\Videos\Captures\Assighnment\images\girl.png" alt="">
+    <!-- Header Navigation -->
+    <header class="navbar">
+        <div class="nav-container">
+            <a href="#" class="logo">
+                <i class="fa-solid fa-book-open-reader"></i>
+                <span>Hancia<strong>Manga</strong></span>
+            </a>
+
+            <!-- Search Bar in Header -->
+            <div class="search-box">
+                <i class="fa-solid fa-magnifying-glass search-icon"></i>
+                <input type="text" id="searchInput" placeholder="Search manga, webtoons, manhwa..." autocomplete="off">
+                <button type="button" id="clearSearchBtn" class="clear-btn hidden" title="Clear search">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+                <button id="searchBtn" class="btn-search">Search</button>
             </div>
-            <div class="col-2">
-                <h1>Hello the call me Hance</h1>
-                <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Officia cum, dicta tempora consequuntur nostrum, quia pariatur blanditiis delectus ducimus 
-                    fuga molestiae sunt ad id veniam nisi unde atque magni! Sint.
-                
-                Lorem ipsum, dolor sit amet consectetur adipisicing elit. Consequatur dolores molestias nemo beatae eum doloremque minima saepe aliquam cupiditate voluptatum modi in 
-                dolore cumque adipisci iusto, nam ab, ullam excepturi?
-            
-            Lorem ipsum dolor sit amet consectetur adipisicing elit. Impedit ut alias eligendi, fugit error deserunt voluptatibus repudiandae architecto saepe sapiente labore, 
-            vel excepturi rerum voluptatum repellat aspernatur illo temporibus assumenda.</p>
 
-            <a id="popup">Read more</a>
-            <p id="text" class="popup"></p>
+            <!-- Controls (Language & Theme Toggle) -->
+            <div class="nav-controls">
+                <div class="lang-selector">
+                    <i class="fa-solid fa-globe"></i>
+                    <select id="langSelect" title="Select Manga Language">
+                        <option value="">All Languages</option>
+                        <option value="en">English</option>
+                        <option value="ja">Japanese (Raw)</option>
+                        <option value="ko">Korean</option>
+                        <option value="zh">Chinese</option>
+                        <option value="es">Spanish</option>
+                        <option value="fr">French</option>
+                        <option value="de">German</option>
+                        <option value="pt-br">Portuguese (BR)</option>
+                        <option value="it">Italian</option>
+                        <option value="ru">Russian</option>
+                    </select>
+                </div>
 
+                <button id="themeToggleBtn" class="theme-toggle-btn" title="Toggle Light/Dark Mode">
+                    <i class="fa-solid fa-moon icon-dark"></i>
+                    <i class="fa-solid fa-sun icon-light"></i>
+                </button>
+            </div>
+        </div>
+    </header>
 
-           
+    <!-- Main Content Area -->
+    <main class="main-container">
+        
+        <!-- Hero / Section Header -->
+        <section class="section-header">
+            <div class="section-title-wrap">
+                <h2 id="sectionTitle">Popular Manga & Webtoons</h2>
+                <p id="sectionSubtitle">Discover real-time updates from MangaDex API with full chapter access</p>
+            </div>
+            <div class="quick-tags">
+                <button class="tag-btn active" data-tag="">All</button>
+                <button class="tag-btn" data-tag="action">Action</button>
+                <button class="tag-btn" data-tag="romance">Romance</button>
+                <button class="tag-btn" data-tag="fantasy">Fantasy</button>
+                <button class="tag-btn" data-tag="comedy">Comedy</button>
+                <button class="tag-btn" data-tag="slice of life">Slice of Life</button>
+            </div>
+        </section>
+
+        <!-- Loader Spinner -->
+        <div id="loadingSpinner" class="spinner-container hidden">
+            <div class="spinner"></div>
+            <p>Fetching real-time data from MangaDex...</p>
+        </div>
+
+        <!-- Error Container -->
+        <div id="errorMessage" class="error-container hidden">
+            <i class="fa-solid fa-circle-exclamation error-icon"></i>
+            <h3 id="errorTitle">Oops! Something went wrong</h3>
+            <p id="errorText">Unable to load content. Please check your internet connection or try again.</p>
+            <button id="retryBtn" class="btn-retry">Retry</button>
+        </div>
+
+        <!-- Manga Grid Results -->
+        <section id="mangaGrid" class="manga-grid">
+            <!-- Dynamic Manga Cards will be rendered here -->
+        </section>
+
+        <!-- Empty Results Message -->
+        <div id="noResults" class="no-results-container hidden">
+            <i class="fa-solid fa-ghost"></i>
+            <h3>No Manga Found</h3>
+            <p>Try searching for a different title or clearing your filter filters.</p>
+        </div>
+
+        <!-- Pagination Controls -->
+        <div id="pagination" class="pagination-container hidden">
+            <button id="prevPageBtn" class="pagination-btn"><i class="fa-solid fa-chevron-left"></i> Previous</button>
+            <span id="pageIndicator" class="page-indicator">Page 1</span>
+            <button id="nextPageBtn" class="pagination-btn">Next <i class="fa-solid fa-chevron-right"></i></button>
+        </div>
+    </main>
+
+    <!-- Manga Details Modal -->
+    <div id="mangaModal" class="modal-overlay hidden">
+        <div class="modal-container">
+            <button id="closeModalBtn" class="close-modal-btn"><i class="fa-solid fa-xmark"></i></button>
+            <div class="modal-content">
+                <div class="modal-left">
+                    <img id="modalCover" src="" alt="Manga Cover" class="modal-cover-img">
+                    <div class="modal-meta-info">
+                        <span id="modalStatus" class="status-badge">Ongoing</span>
+                        <span id="modalYear" class="year-badge">2023</span>
+                        <span id="modalLang" class="lang-badge">EN</span>
+                    </div>
+                </div>
+                <div class="modal-right">
+                    <h2 id="modalTitle">Manga Title</h2>
+                    <p id="modalAltTitles" class="alt-titles"></p>
+                    <div id="modalTags" class="tags-container"></div>
+                    <div class="description-box">
+                        <h3>Synopsis</h3>
+                        <p id="modalDescription">Loading description...</p>
+                    </div>
+
+                    <!-- Chapters Section -->
+                    <div class="chapters-section">
+                        <div class="chapters-header">
+                            <h3>Available Chapters</h3>
+                            <div class="chapter-filter">
+                                <select id="chapterLangSelect">
+                                    <option value="">All Languages</option>
+                                    <option value="en" selected>English</option>
+                                    <option value="ja">Japanese</option>
+                                    <option value="es">Spanish</option>
+                                    <option value="fr">French</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div id="chaptersLoading" class="mini-spinner hidden"></div>
+                        <ul id="chaptersList" class="chapters-list">
+                            <!-- Dynamic Chapter Items -->
+                        </ul>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
-        <script src="js/script.js"></script>
+
+    <!-- Chapter Reader View Modal -->
+    <div id="readerModal" class="reader-overlay hidden">
+        <div class="reader-header">
+            <div class="reader-info">
+                <button id="backToMangaBtn" class="btn-back"><i class="fa-solid fa-arrow-left"></i> Back</button>
+                <div class="reader-title-wrap">
+                    <h4 id="readerMangaTitle">Manga Title</h4>
+                    <span id="readerChapterTitle">Chapter 1</span>
+                </div>
+            </div>
+            <div class="reader-controls">
+                <button id="prevChapterBtn" class="reader-nav-btn"><i class="fa-solid fa-step-backward"></i> Prev Chapter</button>
+                <span id="pageCounter" class="page-counter">Page 1 / 1</span>
+                <button id="nextChapterBtn" class="reader-nav-btn">Next Chapter <i class="fa-solid fa-step-forward"></i></button>
+                <button id="closeReaderBtn" class="close-reader-btn"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+        </div>
+
+        <div id="readerContent" class="reader-content">
+            <div id="readerLoading" class="spinner-container">
+                <div class="spinner"></div>
+                <p>Loading chapter pages from MangaDex At-Home Server...</p>
+            </div>
+            <div id="pagesContainer" class="pages-container hidden">
+                <!-- Page images rendered here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <p>Powered by <a href="https://mangadex.org" target="_blank" rel="noopener">MangaDex API</a> | Built with HTML5, CSS3 & JavaScript</p>
+    </footer>
+
+    <script src="js/script.js"></script>
 </body>
 </html>
