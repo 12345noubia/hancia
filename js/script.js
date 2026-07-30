@@ -198,7 +198,7 @@ document.addEventListener('DOMContentLoaded', () => {
         sectionTitle.innerHTML = `<i class="fa-solid fa-fire"></i> Popular Manga & Webtoons`;
         
         try {
-            const url = `${MANGADEX_BASE}/manga?limit=24&includes[]=cover_art&order[followedCount]=desc&contentRating[]=safe&contentRating[]=suggestive`;
+            const url = `${MANGADEX_BASE}/manga?limit=32&includes[]=cover_art&order[followedCount]=desc&contentRating[]=safe&contentRating[]=suggestive`;
             const data = await fetchWithCorsFallback(url);
 
             if (data && data.data) {
@@ -258,6 +258,13 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    // Helper to build robust cover image URL
+    function buildCoverUrl(mangaId, fileName, size = '') {
+        if (!fileName) return 'https://via.placeholder.com/256x360?text=No+Cover';
+        const suffix = size ? `.${size}.jpg` : '';
+        return `${COVER_BASE}/${mangaId}/${fileName}${suffix}`;
+    }
+
     // Render Grid Cards
     function renderMangaCards(mangaList) {
         mangaGrid.innerHTML = '';
@@ -279,10 +286,9 @@ document.addEventListener('DOMContentLoaded', () => {
             const title = getTitle(attributes.title, attributes.altTitles);
             const description = getDescription(attributes.description);
             const coverFileName = getCoverFileName(manga.relationships);
-            const coverUrl = coverFileName 
-                ? `${COVER_BASE}/${id}/${coverFileName}.256.jpg`
-                : 'https://via.placeholder.com/256x360?text=No+Cover';
-            
+            const primaryCoverUrl = buildCoverUrl(id, coverFileName, '256');
+            const fullCoverUrl = buildCoverUrl(id, coverFileName);
+
             const origLang = (attributes.originalLanguage || 'manga').toUpperCase();
             const pubStatus = attributes.status ? attributes.status.toUpperCase() : 'UNKNOWN';
             
@@ -295,7 +301,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
             card.innerHTML = `
                 <div class="card-cover-wrapper">
-                    <img src="${coverUrl}" alt="${escapeHtml(title)}" loading="lazy" onerror="this.src='https://via.placeholder.com/256x360?text=No+Cover'">
+                    <img src="${primaryCoverUrl}" 
+                         alt="${escapeHtml(title)}" 
+                         loading="lazy" 
+                         referrerpolicy="no-referrer" 
+                         onerror="if(!this.dataset.retry){this.dataset.retry=1;this.src='${fullCoverUrl}';}else{this.src='https://via.placeholder.com/256x360?text=No+Cover';}">
                     <span class="card-badge">${origLang}</span>
                     <span class="card-lang-badge">${pubStatus}</span>
                 </div>
@@ -321,9 +331,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const title = getTitle(attributes.title, attributes.altTitles);
         const description = getDescription(attributes.description);
         const coverFileName = getCoverFileName(manga.relationships);
-        const coverUrl = coverFileName 
-            ? `${COVER_BASE}/${id}/${coverFileName}.512.jpg`
-            : 'https://via.placeholder.com/512x720?text=No+Cover';
+        const primaryCoverUrl = buildCoverUrl(id, coverFileName, '512');
+        const fullCoverUrl = buildCoverUrl(id, coverFileName);
 
         const year = attributes.year || 'N/A';
         const status = attributes.status || 'N/A';
@@ -332,7 +341,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
         mangaDetailsContainer.innerHTML = `
             <div>
-                <img class="details-cover" src="${coverUrl}" alt="${escapeHtml(title)}">
+                <img class="details-cover" 
+                     src="${primaryCoverUrl}" 
+                     alt="${escapeHtml(title)}" 
+                     referrerpolicy="no-referrer" 
+                     onerror="if(!this.dataset.retry){this.dataset.retry=1;this.src='${fullCoverUrl}';}else{this.src='https://via.placeholder.com/512x720?text=No+Cover';}">
             </div>
             <div class="details-info-header">
                 <h1>${escapeHtml(title)}</h1>
@@ -355,22 +368,38 @@ document.addEventListener('DOMContentLoaded', () => {
         await fetchChapters(id);
     }
 
-    // Fetch Chapters for a Manga
+    // Fetch Chapters for a Manga (with full pagination up to 500 chapters)
     async function fetchChapters(mangaId) {
         chaptersLoading.classList.remove('hidden');
         chaptersList.innerHTML = '';
 
         try {
-            // Fetch up to 100 translated chapters
-            const url = `${MANGADEX_BASE}/manga/${mangaId}/feed?limit=100&includes[]=scanlation_group&order[chapter]=desc&contentRating[]=safe&contentRating[]=suggestive`;
-            const data = await fetchWithCorsFallback(url);
+            let allChapters = [];
+            let offset = 0;
+            const limit = 100;
+            let total = 100;
 
-            if (data && data.data) {
-                state.chapters = data.data;
-                populateLanguageFilter(data.data);
+            // Fetch up to 300 chapters for performance
+            while (offset < total && offset < 300) {
+                const url = `${MANGADEX_BASE}/manga/${mangaId}/feed?limit=${limit}&offset=${offset}&includes[]=scanlation_group&order[chapter]=desc&contentRating[]=safe&contentRating[]=suggestive&contentRating[]=erotica`;
+                const data = await fetchWithCorsFallback(url);
+
+                if (data && data.data) {
+                    allChapters = allChapters.concat(data.data);
+                    total = data.total || data.data.length;
+                    offset += limit;
+                    if (data.data.length === 0) break;
+                } else {
+                    break;
+                }
+            }
+
+            if (allChapters.length > 0) {
+                state.chapters = allChapters;
+                populateLanguageFilter(allChapters);
                 filterAndRenderChapters();
             } else {
-                throw new Error('Could not fetch chapters.');
+                chaptersList.innerHTML = `<p style="color: var(--text-muted); padding: 1rem;"><i class="fa-solid fa-info-circle"></i> No translated chapters found for this title.</p>`;
             }
         } catch (err) {
             chaptersList.innerHTML = `<p style="color: #ef4444; padding: 1rem;"><i class="fa-solid fa-circle-exclamation"></i> Error loading chapters: ${err.message}</p>`;
@@ -389,7 +418,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         chapterLangSelect.innerHTML = '<option value="all">All Languages</option>';
-        langs.forEach(lang => {
+        Array.from(langs).sort().forEach(lang => {
             const opt = document.createElement('option');
             opt.value = lang;
             opt.textContent = lang.toUpperCase();
@@ -435,12 +464,16 @@ document.addEventListener('DOMContentLoaded', () => {
             const chTitle = attr.title ? `- ${attr.title}` : '';
             const lang = (attr.translatedLanguage || 'en').toUpperCase();
 
+            // Scanlation group name
+            const groupRel = (ch.relationships || []).find(r => r.type === 'scanlation_group');
+            const groupName = groupRel?.attributes?.name ? ` • ${groupRel.attributes.name}` : '';
+
             const item = document.createElement('div');
             item.className = 'chapter-item';
             item.innerHTML = `
                 <div>
-                    <div class="chapter-num">${escapeHtml(chNum)}</div>
-                    <div class="chapter-sub">${escapeHtml(chTitle)}</div>
+                    <div class="chapter-num">${escapeHtml(chNum)} ${escapeHtml(chTitle)}</div>
+                    <div class="chapter-sub">${lang}${escapeHtml(groupName)}</div>
                 </div>
                 <span class="chapter-lang">${lang}</span>
             `;
@@ -505,6 +538,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const baseUrl = atHomeData.baseUrl;
             const hash = atHomeData.chapter.hash;
+            
+            // Note: MangaDex path for dataSaver is 'data-saver' (kebab-case) in URL, but 'data' for high quality
+            const qualityMode = state.quality === 'dataSaver' ? 'data-saver' : 'data';
             const pageFiles = state.quality === 'dataSaver' ? atHomeData.chapter.dataSaver : atHomeData.chapter.data;
 
             if (!pageFiles || pageFiles.length === 0) {
@@ -513,17 +549,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // Render images vertically for seamless webtoon/manga scrolling
             pageFiles.forEach((filename, i) => {
-                const imgUrl = `${baseUrl}/${state.quality}/${hash}/${filename}`;
+                const imgUrl = `${baseUrl}/${qualityMode}/${hash}/${filename}`;
                 
                 const img = document.createElement('img');
                 img.className = 'reader-page-img';
                 img.alt = `Page ${i + 1}`;
                 img.loading = i < 3 ? 'eager' : 'lazy'; // Fast initial load
+                img.referrerPolicy = 'no-referrer';
                 img.src = imgUrl;
 
                 img.onerror = () => {
                     // Fallback to CORS proxy if image CDN fails
-                    img.src = `https://corsproxy.io/?${encodeURIComponent(imgUrl)}`;
+                    if (!img.dataset.proxied) {
+                        img.dataset.proxied = 'true';
+                        img.src = `https://corsproxy.io/?${encodeURIComponent(imgUrl)}`;
+                    }
                 };
 
                 readerPages.appendChild(img);
@@ -574,14 +614,17 @@ document.addEventListener('DOMContentLoaded', () => {
         if (titleObj.en) return titleObj.en;
         if (titleObj.ja) return titleObj.ja;
         if (titleObj['ja-ro']) return titleObj['ja-ro'];
+        if (titleObj.ko) return titleObj.ko;
+        if (titleObj.zh) return titleObj.zh;
         
         const firstKey = Object.keys(titleObj)[0];
         if (firstKey) return titleObj[firstKey];
 
         if (altTitles && altTitles.length > 0) {
-            const firstAlt = altTitles[0];
-            const altKey = Object.keys(firstAlt)[0];
-            return firstAlt[altKey];
+            for (const alt of altTitles) {
+                const altKey = Object.keys(alt)[0];
+                if (altKey && alt[altKey]) return alt[altKey];
+            }
         }
 
         return 'Untitled';
@@ -589,7 +632,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function getDescription(descObj) {
         if (!descObj) return 'No description provided.';
-        return descObj.en || descObj.ja || Object.values(descObj)[0] || 'No description provided.';
+        return descObj.en || descObj.ja || descObj.ko || Object.values(descObj)[0] || 'No description provided.';
     }
 
     function getCoverFileName(relationships) {
