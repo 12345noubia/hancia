@@ -1,0 +1,17 @@
+{
+  "name": "hancia-manga-reader",
+  "version": "1.0.0",
+  "description": "Real-time Manga & Webtoon Reader powered by MangaDex API",
+  "main": "index.html",
+  "scripts": {
+    "build": "mkdir -p dist && cp -r index.html css js img dist 2>/dev/null || cp -r index.html css js dist",
+    "start": "npx serve dist"
+  },
+  "keywords": [
+    "manga",
+    "webtoon",
+    "mangadex",
+    "reader"
+  ],
+  "license": "MIT"
+}
